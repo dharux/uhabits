@@ -48,7 +48,7 @@
         <item quantity="one">Habit unarchived</item>
         <item quantity="other">Habits unarchived</item>
     </plurals>
-    <string name="toast_day_auto_skip">Day regularly skipped</string>
+    <string name="toast_day_auto_skip">Day automatically skipped</string>
     <string name="title_activity_show_habit" translatable="false"/>
     <string name="overview">Overview</string>
     <string name="habit_strength">Habit strength</string>
@@ -220,6 +220,7 @@
     <string name="measurable_units_example">e.g. miles</string>
     <string name="every_month">Every month</string>
     <string name="validation_cannot_be_blank">Cannot be blank</string>
+    <string name="validation_too_many_skips">Too many days selected</string>
     <string name="today">Today</string>
     <string name="enter">Enter</string>
     <string name="no_habits">No habits found</string>

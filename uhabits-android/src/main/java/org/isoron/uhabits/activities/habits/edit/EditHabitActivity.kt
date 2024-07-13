@@ -342,6 +342,20 @@ class EditHabitActivity : AppCompatActivity() {
                 isValid = false
             }
         }
+        if (isSkipDays) {
+            if (habitType == HabitType.YES_NO && freqDen == 7) {
+                if (7 - listSkipDays.numDays() < freqNum) {
+                    binding.skipDaysPicker.text = getString(R.string.validation_too_many_skips)
+                    binding.skipDaysPicker.error = getFormattedValidationError(R.string.validation_too_many_skips)
+                    isValid = false
+                }
+            }
+            if (listSkipDays.numDays() == 7) {
+                binding.skipDaysPicker.text = getString(R.string.validation_too_many_skips)
+                binding.skipDaysPicker.error = getFormattedValidationError(R.string.validation_too_many_skips)
+                isValid = false
+            }
+        }
         return isValid
     }
 

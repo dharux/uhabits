@@ -252,6 +252,25 @@
 
 
             <!-- Notes -->
+            <FrameLayout
+                android:id="@+id/skipDaysOuterBox"
+                style="@style/FormOuterBox"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout style="@style/FormInnerBox">
+
+                    <TextView
+                        style="@style/FormLabel"
+                        android:text="@string/skip_days" />
+
+                    <TextView
+                        android:id="@+id/skipDaysPicker"
+                        style="@style/FormDropdown"
+                        android:text="@string/skip_days_off" />
+                </LinearLayout>
+            </FrameLayout>
+
             <FrameLayout style="@style/FormOuterBox">
                 <LinearLayout style="@style/FormInnerBox">
                     <TextView

@@ -37,30 +37,41 @@ class StreakList {
     fun recompute(
         computedEntries: EntryList,
         from: Timestamp,
-        to: Timestamp
+        to: Timestamp,
+        skipDays: SkipDays
     ) {
         list.clear()
         val timestamps = computedEntries
-            .getByInterval(from, to)
+            .getByInterval(from, to, skipDays)
             .filter { it.value > 0 }
             .map { it.timestamp }
+            .toTypedArray()
+
+        // gets all the values to make sure that streaks do no consist of just SKIP entries
+        val values = computedEntries
+            .getByInterval(from, to, skipDays)
+            .filter { it.value > 0 }
+            .map { it.value }
             .toTypedArray()
 
         if (timestamps.isEmpty()) return
 
         var begin = timestamps[0]
         var end = timestamps[0]
+        var notSkipStreak = (values[0] != Entry.SKIP)
         for (i in 1 until timestamps.size) {
             val current = timestamps[i]
             if (current == begin.minus(1)) {
                 begin = current
+                if (values[i] != Entry.SKIP) notSkipStreak = true
             } else {
-                list.add(Streak(begin, end))
+                if (notSkipStreak) list.add(Streak(begin, end))
                 begin = current
                 end = current
+                notSkipStreak = (values[i] != Entry.SKIP)
             }
         }
-        list.add(Streak(begin, end))
+        if (notSkipStreak) list.add(Streak(begin, end))
     }
 
     @Synchronized

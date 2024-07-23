@@ -33,7 +33,9 @@ import org.isoron.uhabits.core.models.HabitMatcher
 import org.isoron.uhabits.core.tasks.Task
 import org.isoron.uhabits.core.tasks.TaskRunner
 import org.isoron.uhabits.core.utils.DateUtils.Companion.getTodayWithOffset
+import java.util.ArrayList
 import java.util.Arrays
+import java.util.HashMap
 import java.util.LinkedList
 import java.util.TreeSet
 import javax.inject.Inject
@@ -337,20 +339,20 @@ class HabitCardListCache @Inject constructor(
 
         @Synchronized
         fun copyScoresFrom(oldData: CacheData) {
-            for (uuid in idToHabit.keys) {
-                if (oldData.scores.containsKey(uuid)) {
-                    scores[uuid] =
-                        oldData.scores[uuid]!!
+            for (id in idToHabit.keys) {
+                if (oldData.scores.containsKey(id)) {
+                    scores[id] =
+                        oldData.scores[id]!!
                 } else {
-                    scores[uuid] = 0.0
+                    scores[id] = 0.0
                 }
             }
-            for (uuid in idToHabitGroup.keys) {
-                if (oldData.scores.containsKey(uuid)) {
-                    scores[uuid] =
-                        oldData.scores[uuid]!!
+            for (id in idToHabitGroup.keys) {
+                if (oldData.scores.containsKey(id)) {
+                    scores[id] =
+                        oldData.scores[id]!!
                 } else {
-                    scores[uuid] = 0.0
+                    scores[id] = 0.0
                 }
             }
         }
@@ -619,7 +621,8 @@ class HabitCardListCache @Inject constructor(
                     newData.scores[habit.id] = habit.scores[today].value
                     val list: MutableList<Int> = ArrayList()
                     val notes: MutableList<String> = ArrayList()
-                    for ((_, value, note) in habit.computedEntries.getByInterval(dateFrom, today)) {
+                    val skipDays = habit.skipDays
+                    for ((_, value, note) in habit.computedEntries.getByInterval(dateFrom, today, skipDays)) {
                         list.add(value)
                         notes.add(note)
                     }

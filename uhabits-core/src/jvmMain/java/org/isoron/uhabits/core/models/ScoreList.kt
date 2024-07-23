@@ -19,6 +19,8 @@
 package org.isoron.uhabits.core.models
 
 import org.isoron.uhabits.core.models.Score.Companion.compute
+import java.util.ArrayList
+import java.util.HashMap
 import javax.annotation.concurrent.ThreadSafe
 import kotlin.math.max
 import kotlin.math.min
@@ -61,11 +63,13 @@ class ScoreList {
 
     /**
      * Recomputes all scores between the provided [from] and [to] timestamps.
+     * Takes into account whether some days of the week are automatically skipped.
      */
     @Synchronized
     fun recompute(
         frequency: Frequency,
         isNumerical: Boolean,
+        skipDays: SkipDays,
         numericalHabitType: NumericalHabitType,
         targetValue: Double,
         computedEntries: EntryList,
@@ -77,7 +81,7 @@ class ScoreList {
         var numerator = frequency.numerator
         var denominator = frequency.denominator
         val freq = frequency.toDouble()
-        val values = computedEntries.getByInterval(from, to).map { it.value }.toIntArray()
+        val values = computedEntries.getByInterval(from, to, skipDays).map { it.value }.toIntArray()
         val isAtMost = numericalHabitType == NumericalHabitType.AT_MOST
 
         // For non-daily boolean habits, we double the numerator and the denominator to smooth

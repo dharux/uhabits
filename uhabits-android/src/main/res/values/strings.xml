@@ -50,18 +50,21 @@
         <item quantity="one">Habit unarchived</item>
         <item quantity="other">Habits unarchived</item>
     </plurals>
+    <string name="toast_day_auto_skip">Day automatically skipped</string>
     <string name="title_activity_show_habit" translatable="false"/>
     <string name="overview">Overview</string>
     <string name="habit_strength">Habit strength</string>
     <string name="history">History</string>
     <string name="clear">Clear</string>
     <string name="reminder">Reminder</string>
+    <string name="skip_days">Skip days</string>
     <string name="save">Save</string>
     <string name="streaks">Streaks</string>
     <string name="no_habits_found">You have no active habits</string>
     <string name="no_habits_left_to_do">You\'re all done for today!</string>
     <string name="long_press_to_toggle">Press-and-hold to check or uncheck</string>
     <string name="reminder_off">Off</string>
+    <string name="skip_days_off">Off</string>
     <string name="create_habit">Create habit</string>
     <string name="edit_habit">Edit habit</string>
     <string name="create_habit_group">Create habit group</string>
@@ -223,6 +226,7 @@
     <string name="measurable_units_example">e.g. miles</string>
     <string name="every_month">Every month</string>
     <string name="validation_cannot_be_blank">Cannot be blank</string>
+    <string name="validation_too_many_skips">Too many days selected</string>
     <string name="today">Today</string>
     <string name="enter">Enter</string>
     <string name="no_habits">No habits found</string>

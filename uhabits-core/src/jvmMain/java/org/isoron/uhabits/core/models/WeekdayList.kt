@@ -35,7 +35,18 @@ class WeekdayList {
     }
 
     constructor(weekdays: BooleanArray?) {
-        this.weekdays = Arrays.copyOf(weekdays, 7)
+        this.weekdays = if (weekdays == null) {
+            BooleanArray(7)
+        } else {
+            Arrays.copyOf(weekdays, 7)
+        }
+    }
+
+    constructor(days: BooleanArray, removeDays: BooleanArray) {
+        weekdays = BooleanArray(7)
+        for (i in 0..6) {
+            weekdays[i] = days[i] && !removeDays[i]
+        }
     }
 
     val isEmpty: Boolean
@@ -58,6 +69,14 @@ class WeekdayList {
         return packedList
     }
 
+    fun isDayTrue(dayNum: Int): Boolean {
+        return weekdays[dayNum]
+    }
+
+    fun numDays(): Int {
+        return weekdays.count { it }
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
@@ -73,5 +92,7 @@ class WeekdayList {
 
     companion object {
         val EVERY_DAY = WeekdayList(127)
+        val NO_DAY = WeekdayList(booleanArrayOf(false, false, false, false, false, false, false))
+        val WEEKENDS = WeekdayList(booleanArrayOf(true, true, false, false, false, false, false))
     }
 }

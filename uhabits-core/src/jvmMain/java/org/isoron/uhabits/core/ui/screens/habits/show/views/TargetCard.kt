@@ -46,15 +46,18 @@ class TargetCardPresenter {
             theme: Theme
         ): TargetCardState {
             val today = DateUtils.getTodayWithOffset()
+            val (yearBegin, yearEnd) = getYearRange(firstWeekday)
             val oldest = habit.computedEntries.getKnown().lastOrNull()?.timestamp ?: today
+            val entriesWithSkip = habit.computedEntries.getByInterval(yearBegin, yearEnd, habit.skipDays)
             val entries = habit.computedEntries.getByInterval(oldest, today)
+            val entriesForCount = if (habit.frequency.denominator == 1) entriesWithSkip else entries
 
             val valueToday = entries.groupedSum(
                 truncateField = DateUtils.TruncateField.DAY,
                 isNumerical = habit.isNumerical
             ).firstOrNull()?.value ?: 0
 
-            val skippedDayToday = entries.countSkippedDays(
+            val skippedDayToday = entriesWithSkip.countSkippedDays(
                 truncateField = DateUtils.TruncateField.DAY
             ).firstOrNull()?.value ?: 0
 
@@ -64,7 +67,7 @@ class TargetCardPresenter {
                 isNumerical = habit.isNumerical
             ).firstOrNull()?.value ?: 0
 
-            val skippedDaysThisWeek = entries.countSkippedDays(
+            val skippedDaysThisWeek = entriesForCount.countSkippedDays(
                 truncateField = DateUtils.TruncateField.WEEK_NUMBER,
                 firstWeekday = firstWeekday
             ).firstOrNull()?.value ?: 0
@@ -74,7 +77,7 @@ class TargetCardPresenter {
                 isNumerical = habit.isNumerical
             ).firstOrNull()?.value ?: 0
 
-            val skippedDaysThisMonth = entries.countSkippedDays(
+            val skippedDaysThisMonth = entriesForCount.countSkippedDays(
                 truncateField = DateUtils.TruncateField.MONTH
             ).firstOrNull()?.value ?: 0
 
@@ -83,7 +86,7 @@ class TargetCardPresenter {
                 isNumerical = habit.isNumerical
             ).firstOrNull()?.value ?: 0
 
-            val skippedDaysThisQuarter = entries.countSkippedDays(
+            val skippedDaysThisQuarter = entriesForCount.countSkippedDays(
                 truncateField = DateUtils.TruncateField.QUARTER
             ).firstOrNull()?.value ?: 0
 
@@ -92,7 +95,7 @@ class TargetCardPresenter {
                 isNumerical = habit.isNumerical
             ).firstOrNull()?.value ?: 0
 
-            val skippedDaysThisYear = entries.countSkippedDays(
+            val skippedDaysThisYear = entriesForCount.countSkippedDays(
                 truncateField = DateUtils.TruncateField.YEAR
             ).firstOrNull()?.value ?: 0
 
@@ -107,8 +110,14 @@ class TargetCardPresenter {
             val monthsInQuarter = 3
             val monthsInYear = 12
 
+            val effectiveDenominator = if (habit.frequency.denominator == 7 && habit.skipDays.isSkipDays) {
+                habit.frequency.denominator - habit.skipDays.numDaysSkipped()
+            } else {
+                habit.frequency.denominator
+            }
+
             val denominator = habit.frequency.denominator
-            val dailyTarget = habit.targetValue / habit.frequency.denominator
+            val dailyTarget = habit.targetValue / effectiveDenominator
 
             var targetToday = dailyTarget
             var targetThisWeek = when (denominator) {
@@ -227,16 +236,5 @@ class TargetCardPresenter {
                 theme = theme
             )
         }
-    }
-
-    private fun getYearRange(firstWeekday: Int): Pair<Timestamp, Timestamp> {
-        val today = DateUtils.getTodayWithOffset()
-        val yearBegin = today.truncate(DateUtils.TruncateField.YEAR, firstWeekday)
-        val cali = yearBegin.toCalendar()
-        cali.add(Calendar.YEAR, 1)
-        var newest = Timestamp(cali)
-        val thisWeek = today.truncate(DateUtils.TruncateField.WEEK_NUMBER, firstWeekday)
-        if (thisWeek.daysUntil(newest) < 7) newest = thisWeek.plus(7)
-        return Pair(yearBegin, newest)
     }
 }

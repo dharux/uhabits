@@ -18,9 +18,11 @@
  */
 package org.isoron.uhabits.core.ui.screens.habits.list
 
+import org.isoron.uhabits.core.commands.BlockSkippedDayCommand
 import org.isoron.uhabits.core.commands.CommandRunner
 import org.isoron.uhabits.core.commands.CreateRepetitionCommand
 import org.isoron.uhabits.core.commands.RefreshParentGroupCommand
+import org.isoron.uhabits.core.models.Entry
 import org.isoron.uhabits.core.models.Entry.Companion.YES_MANUAL
 import org.isoron.uhabits.core.models.Habit
 import org.isoron.uhabits.core.models.HabitGroup
@@ -62,10 +64,15 @@ open class ListHabitsBehavior @Inject constructor(
     fun onEdit(habit: Habit, timestamp: Timestamp?) {
         val list = if (habit.isSubHabit()) habit.group!!.habitList else habitList
         val entry = habit.computedEntries.get(timestamp!!)
+        if (habit.skipDays.isDaySkipped(timestamp)) {
+            commandRunner.run(BlockSkippedDayCommand())
+            return
+        }
         if (habit.type == HabitType.NUMERICAL) {
             val oldValue = entry.value.toDouble() / 1000
             screen.showNumberPopup(oldValue, entry.notes) { newValue: Double, newNotes: String, x: Float, y: Float ->
-                val value = (newValue * 1000).roundToInt()
+                val value = if (habit.skipDays.isDaySkipped(timestamp)) Entry.SKIP else (newValue * 1000).roundToInt()
+
                 if (newValue != oldValue) {
                     if (
                         (habit.targetType == AT_LEAST && newValue >= habit.targetValue) ||
@@ -148,14 +155,18 @@ open class ListHabitsBehavior @Inject constructor(
     }
 
     fun onToggle(habit: Habit, timestamp: Timestamp, value: Int, notes: String, x: Float, y: Float) {
-        val list = if (habit.isSubHabit()) habit.group!!.habitList else habitList
-        commandRunner.run(
-            CreateRepetitionCommand(list, habit, timestamp, value, notes)
-        )
-        commandRunner.run(
-            RefreshParentGroupCommand(habit, habitGroupList)
-        )
-        if (value == YES_MANUAL) screen.showConfetti(habit.color, x, y)
+        if (habit.skipDays.isDaySkipped(timestamp)) {
+            commandRunner.run(BlockSkippedDayCommand())
+        } else {
+            val list = if (habit.isSubHabit()) habit.group!!.habitList else habitList
+            commandRunner.run(
+                CreateRepetitionCommand(list, habit, timestamp, value, notes)
+            )
+            commandRunner.run(
+                RefreshParentGroupCommand(habit, habitGroupList)
+            )
+            if (value == YES_MANUAL) screen.showConfetti(habit.color, x, y)
+        }
     }
 
     enum class Message {

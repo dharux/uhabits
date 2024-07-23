@@ -25,12 +25,14 @@ import org.isoron.uhabits.core.models.HabitGroup
 import org.isoron.uhabits.core.models.NumericalHabitType
 import org.isoron.uhabits.core.models.PaletteColor
 import org.isoron.uhabits.core.models.Reminder
+import org.isoron.uhabits.core.models.SkipDays
 import org.isoron.uhabits.core.ui.views.Theme
 
 data class SubtitleCardState(
     val color: PaletteColor,
     val frequency: Frequency,
     val isNumerical: Boolean,
+    val skipDays: SkipDays = SkipDays.NONE,
     val question: String,
     val reminder: Reminder?,
     val targetValue: Double = 0.0,
@@ -48,6 +50,7 @@ class SubtitleCardPresenter {
             color = habit.color,
             frequency = habit.frequency,
             isNumerical = habit.isNumerical,
+            skipDays = habit.skipDays,
             question = habit.question,
             reminder = habit.reminder,
             targetValue = habit.targetValue,

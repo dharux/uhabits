@@ -22,8 +22,6 @@ import org.isoron.uhabits.core.models.Habit
 import org.isoron.uhabits.core.models.HabitList
 import org.isoron.uhabits.core.models.HabitMatcher
 import org.isoron.uhabits.core.utils.DateUtils.Companion.getTodayWithOffset
-import java.util.ArrayList
-import java.util.Comparator
 import java.util.LinkedList
 import java.util.Objects
 
@@ -53,6 +51,13 @@ class MemoryHabitList : HabitList {
         getComposedComparatorByOrder(primaryOrder, secondaryOrder)
     private var parent: MemoryHabitList? = null
 
+    override var collapsed: Boolean = false
+        set(value) {
+            field = value
+            val habits = parent?.list ?: list
+            habits.forEach { it.collapsed = value }
+        }
+
     constructor() : super()
     constructor(
         matcher: HabitMatcher,
@@ -61,6 +66,7 @@ class MemoryHabitList : HabitList {
     ) : super(matcher) {
         this.parent = parent
         this.comparator = comparator
+        this.groupId = parent.groupId
         primaryOrder = parent.primaryOrder
         secondaryOrder = parent.secondaryOrder
         parent.observable.addListener { loadFromParent() }
@@ -77,6 +83,17 @@ class MemoryHabitList : HabitList {
         if (id == null) habit.id = list.size.toLong()
         list.addLast(habit)
         resort()
+    }
+
+    @Synchronized
+    @Throws(IllegalArgumentException::class)
+    override fun add(position: Int, habit: Habit) {
+        throwIfHasParent()
+        require(!list.contains(habit)) { "habit already added" }
+        val id = habit.id
+        if (id != null && getById(id) != null) throw RuntimeException("duplicate id")
+        if (id == null) habit.id = list.size.toLong()
+        list.add(position, habit)
     }
 
     @Synchronized
@@ -179,6 +196,13 @@ class MemoryHabitList : HabitList {
     override fun remove(h: Habit) {
         throwIfHasParent()
         list.remove(h)
+        observable.notifyListeners()
+    }
+
+    @Synchronized
+    override fun removeAt(position: Int) {
+        throwIfHasParent()
+        list.removeAt(position)
         observable.notifyListeners()
     }
 

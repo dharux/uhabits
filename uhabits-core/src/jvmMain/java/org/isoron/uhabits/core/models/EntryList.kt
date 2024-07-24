@@ -29,6 +29,7 @@ import javax.annotation.concurrent.ThreadSafe
 import kotlin.collections.set
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 @ThreadSafe
 open class EntryList {
@@ -157,6 +158,22 @@ open class EntryList {
             }
         }
         return map
+    }
+
+    @Synchronized fun normalizeEntries(
+        isNumerical: Boolean,
+        frequency: Frequency,
+        targetValue: Double
+    ): EntryList {
+        val entries = getKnown()
+        val normalized = EntryList()
+        val dailyTarget = frequency.toDouble() * (if (isNumerical) targetValue else 0.001)
+        for (entry in entries) {
+            if (!isNumerical && entry.value != YES_MANUAL) continue
+            val newValue = (entry.value.toDouble() / dailyTarget).roundToInt()
+            normalized.add(Entry(entry.timestamp, newValue))
+        }
+        return normalized
     }
 
     data class Interval(val begin: Timestamp, val center: Timestamp, val end: Timestamp) {
@@ -324,6 +341,16 @@ fun List<Entry>.groupedSum(
     }.sortedBy { (timestamp, _) ->
         -timestamp.unixTime
     }
+}
+
+fun List<Entry>.groupedSum(): List<Entry> {
+    return this
+        .groupBy { entry -> entry.timestamp }
+        .entries.map { (timestamp, entries) ->
+            Entry(timestamp, entries.sumOf { it.value })
+        }.sortedBy { (timestamp, _) ->
+            -timestamp.unixTime
+        }
 }
 
 /**

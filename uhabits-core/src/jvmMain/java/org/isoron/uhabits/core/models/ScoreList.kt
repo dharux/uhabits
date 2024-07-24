@@ -140,4 +140,21 @@ class ScoreList {
             map[timestamp] = Score(timestamp, previousValue)
         }
     }
+
+    @Synchronized
+    fun combineFrom(
+        habitList: HabitList,
+        from: Timestamp,
+        to: Timestamp
+    ) {
+        var current = to
+        while (current >= from) {
+            val habitScores = habitList
+                .filter { !it.isArchived }
+                .map { it.scores[current].value }
+            val averageScore = if (habitScores.isNotEmpty()) habitScores.average() else 0.0
+            map[current] = Score(current, averageScore)
+            current = current.minus(1)
+        }
+    }
 }
